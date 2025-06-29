@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event Details - Vowly</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-image: url('./img/IMG_6502.JPG'); /* Path to your image */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .bg-overlay {
+      background-color: transparent; /* Remove overlay opacity */
+      backdrop-filter: none; /* Remove blur effect */
+    }
+
+    .container {
+      flex: 1;
+      padding: 1rem; /* Add padding for mobile devices */
+    }
+
+    .slider img {
+      width: 100%; /* Ensure images fit within the viewport */
+      height: auto;
+    }
+
+    footer {
+      background-color: #004d40;
+      color: #ffffff;
+      position: sticky;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .text-gold-600 {
+      color: #d4af37; /* Gold color */
+    }
+
+    .text-green-600 {
+      color: #004d40; /* Stronger green color */
+    }
+
+    .border-green-600 {
+      border-color: #004d40; /* Green border */
+    }
+
+    .wedding-ring {
+      fill: #d4af37; /* Gold fill for the ring */
+    }
+
+    .tab-header {
+      background: linear-gradient(to right, #d4af37, #f1c40f); /* Gold gradient */
+      color: white;
+    }
+    .file-label {
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .file-label:hover {
+      background-color: #d4af37; /* Gold hover effect */
+    }
+    .error-boundary button:hover {
+      background-color: #d4af37; /* Gold hover effect for error button */
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans">
+  <div class="bg-overlay">
+    <header class="bg-white shadow-md py-6">
+      <div class="container mx-auto flex items-center justify-center">
+        <div class="flex items-center space-x-4">
+
+            <div class="w-12 h-12 rounded-full border-4 border-green-600 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 4a6 6 0 1 1-6 6 6 6 0 0 1 6-6z" />
+              <circle cx="12" cy="12" r="4" fill="#004d40" />
+            </svg>
+          </div>
+          <h1 class="text-4xl font-bold text-green-600">Vowly</h1>
+        </div>
+      </div>
+    </header>
+    <div id="root"></div>
+  </div>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/framer-motion@11.11.9/dist/framer-motion.js" crossorigin></script>
+  <script>
+    // Fallback for motion components if window.motion is undefined
+    const motion = window.motion || {
+      div: 'div',
+      button: 'button',
+      img: 'img'
+    };
+
+    const API_BASE_URL = 'http://localhost:8000/api';
+
+    const mockEvent = {
+
+        title: "Opeyemi & Olorunfemi's Wedding",
+      event_date: "July 5, 2025",
+      event_time: "11:00 AM",
+      venue_name: "Noble House Christian Center, Greenhall, 5 Taiwo Shitta Street, Off Bola Ahmed Tinubu Road, Iju Ishaga, Lagos",
+      description: "The Families of Late Elder Elliot & Mrs. Nnenne Akinyelure and Late Mr. Michael & Mrs. Mojisola Obayomi cordially invite you to the solemnization of holy matrimony of their children Opeyemi & Olorunfemi. Reception follows immediately after at the same venue.",
+      hashtag: "#OpeGotTheFemiVibe",
+      colors: "Emerald Green & Rose Gold",
+      rsvp: [
+        { name: "Yewande", phone: "0808 905 1175" },
+        { name: "Maria", phone: "0810 612 1377" },
+      ],
+    };
+
+    const mockComments = [
+      { id: 1, name: "Fatima", text: "Wishing you both a lifetime of happiness!" },
+      { id: 2, name: "Chinedu", text: "So excited for your big day!" },
+    ];
+
+    function ErrorBoundary(props) {
+      var _React$useState = React.useState(null),
+          error = _React$useState[0],
+          setError = _React$useState[1];
+
+      React.useEffect(function () {
+        return function () { setError(null); };
+      }, []);
+
+      function componentDidCatch(err) {
+        setError(err);
+      }
+
+      if (error) {
+        return React.createElement(
+          "div",
+          { className: "error-boundary" },
+          React.createElement("h2", { className: "text-xl font-bold text-red-600" }, "Something went wrong"),
+          React.createElement("p", { className: "text-gray-700 mt-2" }, error.message || "An unexpected error occurred."),
+          React.createElement("button", {
+            className: "mt-4 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700",
+            onClick: function () { setError(null); }
+          }, "Try Again")
+        );
+      }
+
+      return props.children;
+    }
+
+    function Toast(props) {
+      React.useEffect(function () {
+        var timer = setTimeout(props.onClose, 3000);
+        return function () { return clearTimeout(timer); };
+      }, [props.onClose]);
+
+      return React.createElement(
+        motion.div,
+        {
+          initial: window.motion ? { opacity: 0, y: 50 } : {},
+          animate: window.motion ? { opacity: 1, y: 0 } : {},
+          exit: window.motion ? { opacity: 0, y: 50 } : {},
+          className: "fixed bottom-4 right-4 p-4 rounded-md shadow-md text-white " + (props.type === "success" ? "bg-green-600" : "bg-red-600")
+        },
+        props.message
+      );
+    }
+
+    function GuestWishes(props) {
+      var _React$useState = React.useState(mockComments),
+          comments = _React$useState[0],
+          setComments = _React$useState[1];
+      var _React$useState2 = React.useState(""),
+          name = _React$useState2[0],
+          setName = _React$useState2[1];
+      var _React$useState3 = React.useState(""),
+          text = _React$useState3[0],
+          setText = _React$useState3[1];
+      var _React$useState4 = React.useState(""),
+          error = _React$useState4[0],
+          setError = _React$useState4[1];
+      var _React$useState5 = React.useState(false),
+          submitting = _React$useState5[0],
+          setSubmitting = _React$useState5[1];
+      var _React$useState6 = React.useState(null),
+          toast = _React$useState6[0],
+          setToast = _React$useState6[1];
+
+      var fetchComments = React.useCallback(function () {
+        if (!props.eventId) return;
+        fetch(API_BASE_URL + "/events/" + props.eventId + "/comments/")
+          .then(function (res) {
+            if (!res.ok) throw new Error("Failed to fetch");
+            return res.json();
+          })
+          .then(function (data) {
+            setComments(data.length > 0 ? data : mockComments);
+          })
+          .catch(function (error) {
+            console.error("Failed to load wishes:", error);
+            setError("Could not load wishes. Using mock data.");
+            setComments(mockComments);
+          });
+      }, [props.eventId]);
+
+      React.useEffect(function () {
+        fetchComments();
+      }, [fetchComments]);
+
+      function handleSubmit(e) {
+        e.preventDefault();
+        if (submitting) return;
+        setSubmitting(true);
+        setError("");
+        var payload = { name: name, text: text };
+
+        fetch(API_BASE_URL + "/events/" + props.eventId + "/comments/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+          .then(function (res) {
+            if (!res.ok) {
+              return res.json().then(function (errData) {
+                throw new Error(errData.detail || "Failed to submit wish.");
+              });
+            }
+            return res.json();
+          })
+          .then(function (newComment) {
+            setComments([newComment].concat(comments));
+            setName("");
+            setText("");
+            setToast({ message: "Wish submitted successfully!", type: "success" });
+          })
+          .catch(function (err) {
+            console.error("Failed to submit wish:", err);
+            setError(err.message);
+            setToast({ message: err.message, type: "error" });
+            var mockComment = { id: Date.now(), name: name, text: text };
+            setComments([mockComment].concat(comments));
+            setName("");
+            setText("");
+          })
+          .finally(function () {
+            setSubmitting(false);
+          });
+      }
+
+      return React.createElement(
+        motion.div,
+        {
+          initial: window.motion ? { opacity: 0 } : {},
+          animate: window.motion ? { opacity: 1 } : {},
+          exit: window.motion ? { opacity: 0 } : {},
+          transition: window.motion ? { duration: 0.3 } : {},
+          className: "p-6 bg-white rounded-lg shadow-md",
+        },
+        React.createElement("h2", { className: "text-2xl font-bold text-white mb-4 p-4 rounded-t tab-header" }, "Leave a Wish"),
+        React.createElement(
+          "form",
+          { onSubmit: handleSubmit, className: "mb-6" },
+          React.createElement("textarea", {
+            value: text,
+            onChange: function (e) { return setText(e.target.value); },
+            className: "w-full border border-gray-300 rounded-md p-3 mb-3 focus:ring-green-500 focus:border-green-500 transition duration-200",
+            rows: "4",
+            placeholder: "Share your heartfelt wishes for the couple...",
+            required: true,
+          }),
+          React.createElement("input", {
+            type: "text",
+            value: name,
+            onChange: (e) => setName(e.target.value),
+            className: "w-full border border-gray-300 rounded-md p-3 mb-3 focus:ring-green-500 focus:border-green-500 transition duration-200",
+            placeholder: "Your name",
+            required: true,
+          }),
+          error && React.createElement("p", { className: "text-red-500 text-sm mb-3" }, error),
+          React.createElement(
+            "button",
+            {
+              type: "submit",
+              disabled: submitting,
+              className: "bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:bg-gray-400 transition duration-200",
+            },
+            submitting ? "Posting..." : "Post Wish"
+          )
+        ),
+        React.createElement(
+          "div",
+          { className: "space-y-4" },
+          comments.length > 0
+            ? comments.map(function (comment, index) {
+                return React.createElement(
+                  motion.div,
+                  {
+                    key: comment.id,
+                    initial: window.motion ? { opacity: 0, y: 20 } : {},
+                    animate: window.motion ? { opacity: 1, y: 0 } : {},
+                    transition: window.motion ? { duration: 0.5, delay: index * 0.1 } : {},
+                    className: "bg-gray-100 p-4 rounded-lg shadow",
+                  },
+                  React.createElement("p", { className: "text-gray-700 italic text-lg" }, '"' + comment.text + '"'),
+                  React.createElement("p", { className: "text-right text-sm text-gray-500 mt-2 font-medium" }, "- " + comment.name)
+                );
+              })
+            : React.createElement("p", { className: "text-gray-500 italic" }, "Be the first to leave a wish!")
+        ),
+        toast && React.createElement(Toast, { message: toast.message, type: toast.type, onClose: function () { return setToast(null); } })
+      );
+    }
+
+    function useEventDetails(eventId) {
+      var _React$useState = React.useState(null),
+          event = _React$useState[0],
+          setEvent = _React$useState[1];
+      var _React$useState2 = React.useState(true),
+          loading = _React$useState2[0],
+          setLoading = _React$useState2[1];
+      var _React$useState3 = React.useState(null),
+          error = _React$useState3[0],
+          setError = _React$useState3[1];
+
+      React.useEffect(function () {
+        function fetchEvent() {
+          setLoading(true);
+          fetch(API_BASE_URL + "/events/" + eventId + "/")
+            .then(function (res) {
+              if (!res.ok) throw new Error("Failed to fetch event");
+              return res.json();
+            })
+            .then(function (data) {
+              setEvent(data);
+              setError(null);
+            })
+            .catch(function (err) {
+              console.error("Failed to fetch event:", err);
+              setEvent(mockEvent);
+              setError(err.message);
+            })
+            .finally(function () {
+              setLoading(false);
+            });
+        }
+        if (eventId) fetchEvent();
+        else {
+          setEvent(mockEvent);
+          setLoading(false);
+        }
+      }, [eventId]);
+
+      return { event: event, loading: loading, error: error };
+    }
+
+    function TabButton(props) {
+      return React.createElement(
+        motion.button,
+        {
+          onClick: props.onClick,
+          whileHover: window.motion ? { scale: 1.05 } : {},
+          whileTap: window.motion ? { scale: 0.95 } : {},
+          className: "py-3 px-6 text-sm font-medium " + 
+            (props.active ? "text-white bg-gold-600 rounded-t-md" : "text-gray-600 hover:text-gold-600 hover:bg-gold-100") + 
+            " transition duration-200",
+        },
+        props.label
+      );
+    }
+
+    function EventInfo(props) {
+      if (props.loading) {
+        return React.createElement("div", { className: "p-6 text-center" }, "Loading event details...");
+      }
+      if (props.error) {
+        return React.createElement("div", { className: "p-6 text-red-500" }, "Error: " + props.error);
+      }
+      return React.createElement(
+        motion.div,
+        {
+          initial: window.motion ? { opacity: 0 } : {},
+          animate: window.motion ? { opacity: 1 } : {},
+          exit: window.motion ? { opacity: 0 } : {},
+          transition: window.motion ? { duration: 0.3 } : {},
+          className: "p-6 bg-white rounded-lg shadow-md",
+        },
+        React.createElement("h2", { className: "text-2xl font-bold text-white mb-4 p-4 rounded-t tab-header" }, props.event ? props.event.title : "Our Special Day"),
+        React.createElement(
+          "div",
+          { className: "space-y-4" },
+          React.createElement(
+            "div",
+            { className: "flex items-center" },
+            React.createElement(
+              "svg",
+              { className: "w-6 h-6 text-green-600 mr-2", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
+              React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" })
+            ),
+            React.createElement("p", { className: "text-gray-700" }, "Date: ", React.createElement("span", { className: "font-semibold" }, props.event ? (props.event.event_date + " at " + props.event.event_time) : ""))
+          ),
+          React.createElement(
+            "div",
+            { className: "flex items-center" },
+            React.createElement(
+              "svg",
+              { className: "w-6 h-6 text-green-600 mr-2", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
+              React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M17.657 16.657L13.414 20.9a1.998 1.998 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0z" })
+            ),
+            React.createElement("p", { className: "text-gray-700" }, "Venue: ", React.createElement("span", { className: "font-semibold" }, props.event ? props.event.venue_name : ""))
+          ),
+          React.createElement("p", { className: "text-gray-700 leading-relaxed" }, props.event ? props.event.description : ""),
+          React.createElement(
+            "div",
+            { className: "mt-6" },
+            React.createElement("h3", { className: "text-lg font-bold text-gray-800 mb-2" }, "Live Stream"),
+            React.createElement(
+              "div",
+              { className: "aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-md" },
+              React.createElement("iframe", {
+                src: "https://www.youtube.com/embed/<VIDEO_ID>", // Replace <VIDEO_ID> with the actual YouTube video ID
+                title: "Wedding Live Stream",
+                frameBorder: "0",
+                allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
+                allowFullScreen: true,
+                className: "w-full h-full",
+              })
+            )
+          )
+        )
+      );
+    }
+
+    function ImageSlider({ images }) {
+      const [currentIndex, setCurrentIndex] = React.useState(0);
+
+      const nextSlide = () => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+      };
+
+      const prevSlide = () => {
+        setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+      };
+
+      return React.createElement(
+        "div",
+        { className: "relative w-full max-w-lg mx-auto overflow-hidden rounded-lg shadow-lg" },
+        React.createElement(
+          "div",
+          { className: "flex items-center justify-between absolute top-1/2 transform -translate-y-1/2 w-full px-4" },
+          React.createElement(
+            "button",
+            {
+              onClick: prevSlide,
+              className: "bg-green-600 text-white p-2 rounded-full hover:bg-green-700 transition duration-200",
+            },
+            React.createElement("svg", {
+              xmlns: "http://www.w3.org/2000/svg",
+              className: "w-6 h-6",
+              fill: "none",
+              viewBox: "0 0 24 24",
+              stroke: "currentColor",
+            }, React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M15 19l-7-7 7-7" }))
+          ),
+          React.createElement(
+            "button",
+            {
+              onClick: nextSlide,
+              className: "bg-green-600 text-white p-2 rounded-full hover:bg-green-700 transition duration-200",
+            },
+            React.createElement("svg", {
+              xmlns: "http://www.w3.org/2000/svg",
+              className: "w-6 h-6",
+              fill: "none",
+              viewBox: "0 0 24 24",
+              stroke: "currentColor",
+            }, React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M9 5l7 7-7 7" }))
+          )
+        ),
+        React.createElement("img", {
+          src: images[currentIndex],
+          alt: `Slide ${currentIndex + 1}`,
+          className: "w-full h-64 object-cover",
+        })
+      );
+    }
+
+    function CoupleStory(props) {
+      const images = [
+        "./img/IMG_6502.JPG",
+        "./img/IMG_6508.JPG",
+        "./img/IMG_6512.JPG", // Third picture added
+      ];
+
+      return React.createElement(
+        motion.div,
+        {
+          initial: window.motion ? { opacity: 0 } : {},
+          animate: window.motion ? { opacity: 1 } : {},
+          exit: window.motion ? { opacity: 0 } : {},
+          transition: window.motion ? { duration: 0.3 } : {},
+          className: "p-6 bg-white rounded-lg shadow-md",
+        },
+        React.createElement("h2", { className: "text-2xl font-bold text-green-600 mb-4" }, "Our Love Story"),
+        React.createElement(
+          "div",
+          { className: "space-y-4" },
+          React.createElement("p", { className: "text-gray-700 leading-relaxed text-lg" }, 
+            "Opeyemi and Olorunfemi met on a sunny afternoon at a mutual friend's wedding. Their connection was instant, and they spent hours talking about their dreams, passions, and love for family. Over the years, their bond grew stronger, filled with laughter, adventures, and unwavering support for each other. Now, they are ready to embark on a new journey together, promising to cherish and love each other forever."
+          ),
+          React.createElement(ImageSlider, { images })
+        )
+      );
+    }
+
+    function Gallery(props) {
+      var _React$useState = React.useState([]),
+          uploadedMedia = _React$useState[0],
+          setUploadedMedia = _React$useState[1];
+      var _React$useState2 = React.useState(""),
+          error = _React$useState2[0],
+          setError = _React$useState2[1];
+      var _React$useState3 = React.useState(null),
+          toast = _React$useState3[0],
+          setToast = _React$useState3[1];
+      var _React$useState4 = React.useState(false),
+          uploading = _React$useState4[0],
+          setUploading = _React$useState4[1];
+
+      async function handleFileUpload(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+
+        var validImageTypes = ["image/jpeg", "image/png"];
+        var validVideoTypes = ["video/mp4", "video/webm"];
+        var validTypes = validImageTypes.concat(validVideoTypes);
+        var maxSize = 10 * 1024 * 1024;
+
+        if (!validTypes.includes(file.type)) {
+          setError("Please upload a JPEG/PNG image or MP4/WebM video.");
+          setToast({ message: "Invalid file type!", type: "error" });
+          return;
+        }
+        if (file.size > maxSize) {
+          setError("File size exceeds 10MB limit.");
+          setToast({ message: "File too large!", type: "error" });
+          return;
+        }
+
+        setUploading(true);
+        setError("");
+        try {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("fileName", file.name);
+
+          const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.error || "Upload failed");
+          }
+
+          var newMedia = {
+            url: result.url,
+            alt: "Guest upload " + new Date().toLocaleString(),
+            type: file.type.startsWith("image") ? "image" : "video",
+          };
+          var updatedMedia = [newMedia].concat(uploadedMedia);
+          setUploadedMedia(updatedMedia);
+          localStorage.setItem("uploadedMedia", JSON.stringify(updatedMedia));
+          setToast({ message: "Media uploaded successfully!", type: "success" });
+        } catch (err) {
+          setError(err.message);
+          setToast({ message: "Upload failed: " + err.message, type: "error" });
+        } finally {
+          setUploading(false);
+        }
+      }
+
+      var allMedia = (props.media || []).concat(uploadedMedia);
+
+      if (props.loading) {
+        return React.createElement("div", { className: "p-6 text-center" }, "Loading gallery...");
+      }
+      if (props.error) {
+        return React.createElement("div", { className: "p-6 text-red-500" }, "Error: " + props.error);
+      }
+
+      return React.createElement(
+        motion.div,
+        {
+          initial: window.motion ? { opacity: 0 } : {},
+          animate: window.motion ? { opacity: 1 } : {},
+          exit: window.motion ? { opacity: 0 } : {},
+          transition: window.motion ? { duration: 0.3 } : {},
+          className: "p-6 bg-white rounded-lg shadow-md",
+        },
+        React.createElement("h2", { className: "text-2xl font-bold text-white mb-4 p-4 rounded-t tab-header" }, "Memories Gallery"),
+        React.createElement(
+          "div",
+          { className: "mb-6" },
+          React.createElement(
+            "label",
+            {
+              htmlFor: "media-upload",
+              className: "file-label bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition duration-200 inline-block" + (uploading ? " opacity-50 cursor-not-allowed" : ""),
+            },
+            uploading ? "Uploading..." : "Upload Photo/Video"
+          ),
+          React.createElement("input", {
+            id: "media-upload",
+            type: "file",
+            accept: "image/jpeg,image/png,video/mp4,video/webm",
+            onChange: handleFileUpload,
+            className: "file-input",
+            disabled: uploading,
+          }),
+          error && React.createElement("p", { className: "text-red-500 text-sm mt-2" }, error)
+        ),
+        React.createElement(
+          "div",
+          { className: "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" },
+          allMedia.length > 0
+            ? allMedia.map(function (item, i) {
+                return React.createElement(
+                  motion.div,
+                  {
+                    key: i,
+                    initial: window.motion ? { opacity: 0, scale: 0.8 } : {},
+                    animate: window.motion ? { opacity: 1, scale: 1 } : {},
+                    transition: window.motion ? { duration: 0.5, delay: i * 0.1 } : {},
+                    className: "relative group",
+                  },
+                  item.type === "video"
+                    ? React.createElement("video", {
+                        src: item.url,
+                        controls: true,
+                        className: "rounded-lg shadow-md w-full h-48 object-cover",
+                      })
+                    : React.createElement("img", {
+                        src: item.url,
+                        alt: item.alt || "Gallery Image",
+                        className: "rounded-lg shadow-md w-full h-48 object-cover",
+                      }),
+                  React.createElement(
+                    "div",
+                    { className: "absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition duration-300 flex items-center justify-center" },
+                    React.createElement("p", { className: "text-white opacity-0 group-hover:opacity-100" }, item.alt)
+                  )
+                );
+              })
+            : React.createElement("p", { className: "text-gray-500 italic" }, "No media yet. Upload some memories!")
+        ),
+        toast && React.createElement(Toast, { message: toast.message, type: toast.type, onClose: function () { return setToast(null); } })
+      );
+    }
+
+    const dummyGiftItems = Array.from({ length: 20 }, (_, i) => ({
+      name: `Gift Item ${i + 1}`,
+      description: `Description for Gift Item ${i + 1}`,
+      price: Math.floor(Math.random() * 50000) + 10000, // Random price between 10,000 and 50,000
+    }));
+
+    const accountDetails = {
+      bankName: "First Bank",
+      accountName: "Opeyemi & Olorunfemi",
+      accountNumber: "1234567890",
+      sortCode: "011",
+    };
+
+    function Wishlist(props) {
+      const [uploadedReceipts, setUploadedReceipts] = React.useState([]);
+
+      const handleReceiptUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const receipt = {
+            name: file.name,
+            url: URL.createObjectURL(file),
+          };
+          setUploadedReceipts([...uploadedReceipts, receipt]);
+        }
+      };
+
+      return React.createElement(
+        motion.div,
+        {
+          initial: window.motion ? { opacity: 0 } : {},
+          animate: window.motion ? { opacity: 1 } : {},
+          exit: window.motion ? { opacity: 0 } : {},
+          transition: window.motion ? { duration: 0.3 } : {},
+          className: "p-6 bg-white rounded-lg shadow-md",
+        },
+        React.createElement("h2", { className: "text-2xl font-bold text-green-600 mb-4" }, "Our Wishlist"),
+        React.createElement(
+          "div",
+          { className: "mb-6 bg-gray-100 p-4 rounded-lg" },
+          React.createElement("h3", { className: "text-lg font-semibold text-gray-800 mb-2" }, "Cash Gift Option"),
+          React.createElement("p", { className: "text-gray-700 mb-1" }, `Bank: ${accountDetails.bankName}`),
+          React.createElement("p", { className: "text-gray-700 mb-1" }, `Account Name: ${accountDetails.accountName}`),
+          React.createElement("p", { className: "text-gray-700 mb-1" }, `Account Number: ${accountDetails.accountNumber}`),
+          React.createElement("p", { className: "text-gray-700 mb-3" }, `Sort Code: ${accountDetails.sortCode}`),
+          React.createElement(
+            "label",
+            { className: "file-label bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200 cursor-pointer" },
+            "Upload Transfer Receipt",
+            React.createElement("input", {
+              type: "file",
+              className: "hidden",
+              onChange: handleReceiptUpload,
+            })
+          )
+        ),
+        React.createElement(
+          "div",
+          { className: "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" },
+          dummyGiftItems.map((item, index) =>
+            React.createElement(
+              "div",
+              { key: index, className: "bg-gray-50 p-4 rounded-lg shadow-md hover:shadow-lg transition duration-200" },
+              React.createElement("h3", { className: "font-semibold text-gray-800 text-lg mb-2" }, item.name),
+              React.createElement("p", { className: "text-gray-600 text-sm mb-2" }, item.description),
+              React.createElement("p", { className: "text-green-700 font-medium" }, `₦${item.price.toLocaleString()}`)
+            )
+          )
+        ),
+        React.createElement(
+          "div",
+          { className: "mt-6 space-y-4" },
+          uploadedReceipts.map((receipt, index) =>
+            React.createElement(
+              "div",
+              { key: index, className: "flex items-center space-x-4" },
+              React.createElement("img", {
+                src: receipt.url,
+                alt: receipt.name,
+                className: "w-16 h-16 object-cover rounded-lg shadow-md",
+              }),
+              React.createElement("p", { className: "text-gray-700" }, receipt.name)
+            )
+          )
+        )
+      );
+    }
+
+    function App() {
+      const [tabsVisible, setTabsVisible] = React.useState(true); // State to toggle tabs visibility
+      const eventId = new URLSearchParams(window.location.search).get("id");
+      const { event, loading, error } = useEventDetails(eventId);
+      const [activeTab, setActiveTab] = React.useState(localStorage.getItem("activeTab") || "info");
+
+      function handleTabClick(tabName) {
+        localStorage.setItem("activeTab", tabName);
+        setActiveTab(tabName);
+      }
+
+      return React.createElement(
+        ErrorBoundary,
+        null,
+        React.createElement(
+          "div",
+          { className: "container mx-auto px-4 py-6 flex flex-col min-h-screen" },
+          React.createElement(
+            "div",
+            { className: "flex justify-between items-center mb-4" },
+            React.createElement(
+              motion.button,
+              {
+                onClick: () => setTabsVisible(!tabsVisible),
+                whileHover: window.motion ? { scale: 1.05 } : {},
+                whileTap: window.motion ? { scale: 0.95 } : {},
+                className: "p-2 rounded-full bg-green-600 text-white hover:bg-green-700 transition duration-200",
+              },
+              React.createElement(
+                "svg",
+                {
+                  xmlns: "http://www.w3.org/2000/svg",
+                  className: "w-6 h-6",
+                  fill: "none",
+                  viewBox: "0 0 24 24",
+                  stroke: "currentColor",
+                },
+                tabsVisible
+                  ? React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M6 18L18 6M6 6l12 12" }) // Cross icon for "Hide Tabs"
+                  : React.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M4 6h16M4 12h16M4 18h16" }) // Hamburger icon for "Show Tabs"
+              )
+            )
+          ),
+          tabsVisible &&
+            React.createElement(
+              "div",
+              { className: "border-b border-gray-300 mb-6 flex flex-wrap space-x-2 sm:space-x-4" },
+              React.createElement(TabButton, { label: "Guest Wishes", active: activeTab === "wishes", onClick: () => handleTabClick("wishes") }),
+              React.createElement(TabButton, { label: "Event Info", active: activeTab === "info", onClick: () => handleTabClick("info") }),
+              React.createElement(TabButton, { label: "Couple Story", active: activeTab === "story", onClick: () => handleTabClick("story") }),
+              React.createElement(TabButton, { label: "Gallery", active: activeTab === "gallery", onClick: () => handleTabClick("gallery") }),
+              React.createElement(TabButton, { label: "Wishlist", active: activeTab === "wishlist", onClick: () => handleTabClick("wishlist") })
+            ),
+          tabsVisible &&
+            React.createElement(
+              "div",
+              { className: "overflow-y-auto max-h-[70vh]" }, // Scrollable content
+              activeTab === "wishes" && React.createElement(GuestWishes, { eventId }),
+              activeTab === "info" && React.createElement(EventInfo, { event, loading, error }),
+              activeTab === "story" && React.createElement(CoupleStory, { event, loading, error }),
+              activeTab === "gallery" && React.createElement(Gallery, { media: event ? event.media : [], loading, error }),
+              activeTab === "wishlist" && React.createElement(Wishlist, { items: event ? event.wishlist : [], accountDetails: event ? event.accountDetails : null, loading, error })
+            ),
+          React.createElement(
+            "footer",
+            { className: "bg-gray-800 text-white py-6 text-center mt-auto" }, // Footer sticks to the bottom
+            React.createElement("p", null, "© " + new Date().getFullYear() + " Vowly. All rights reserved.")
+          )
+        )
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+  </script>
+</body>
+</html>
