@@ -51,3 +51,9 @@ export const config = {
     bodyParser: false,
   },
 };
+
+// Client-side code
+const response = await fetch("/api/upload", {
+  method: "POST",
+  body: formData,
+});

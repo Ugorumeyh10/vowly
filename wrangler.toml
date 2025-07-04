@@ -1,0 +1,29 @@
+name = "vowly-backend"
+main = "workers/index.js"
+compatibility_date = "2025-07-04"
+
+# Plaintext environment variables
+[vars]
+# IMPORTANT: Replace with your deployed frontend URL if it's different
+APP_URL = "https://vowly.com.ng"
+# IMPORTANT: Replace with your R2 bucket name
+R2_BUCKET_NAME = "vowly-media"
+
+# KV Namespace bindings
+# You must find the 'id' for each namespace in your Cloudflare Dashboard
+# under Workers & Pages -> KV
+[[kv_namespaces]]
+binding = "LOGIN_TOKENS_KV"
+id = "44fadb91474c467b981d4144f2a1ea7a" # 👈 Replace with your actual ID
+
+[[kv_namespaces]]
+binding = "MEDIA_METADATA"
+id = "da0787ad959b4b87b4bf4f6295246546" # 👈 Replace with your actual ID
+
+[[kv_namespaces]]
+binding = "MEDIA_COMMENTS"
+id = "8c540e572fe5456aa3d25294f3fe6c2c" # 👈 Replace with your actual ID
+
+[[kv_namespaces]]
+binding = "GUESTS_KV"
+id = "626b10469ca7453ba248204c90b84b44" # 👈 Replace with your actual ID
