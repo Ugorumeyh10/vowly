@@ -1,9 +1,10 @@
 {
   "files": {
-    "main.js": "/vowly/static/js/main.31d6cfe0.js",
-    "index.html": "/vowly/index.html"
+    "main.js": "/vowly/static/js/main.b21edba2.js",
+    "index.html": "/vowly/index.html",
+    "main.b21edba2.js.map": "/vowly/static/js/main.b21edba2.js.map"
   },
   "entrypoints": [
-    "static/js/main.31d6cfe0.js"
+    "static/js/main.b21edba2.js"
   ]
 }
